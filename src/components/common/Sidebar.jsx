@@ -1,23 +1,67 @@
-import { LayoutDashboard, Sprout, BarChart3, Users, Settings, ChevronLeft, LogOut, Home } from 'lucide-react';
+import { useState } from 'react';
+import { LayoutDashboard, Sprout, BarChart3, Users, Settings, ChevronLeft, LogOut, Home, X, AlertCircle } from 'lucide-react';
 import logo from '../../assets/logo.png';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpen, onClose, onLogout }) {
+// Componente para el Modal de Cierre de Sesión Estético
+const LogoutModal = ({ isOpen, onClose, onConfirm }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
+      <div className="bg-[#F5F5DC] w-full max-w-sm rounded-[24px] overflow-hidden shadow-2xl border border-[#fbefe1] animate-slideUp">
+        <div className="p-8 pb-4 text-center">
+          <div className="w-16 h-16 bg-[#8b6f47]/10 rounded-full flex items-center justify-center mx-auto mb-5">
+            <AlertCircle size={32} className="text-[#5c4731]" />
+          </div>
+          <h2 className="text-xl font-bold text-[#4B3621] mb-2 font-serif">¿Seguro que quieres salir de Tetlalli?</h2>
+          <p className="text-[#847563] text-sm">Esperamos verte de vuelta pronto en el huerto.</p>
+        </div>
+        
+        <div className="p-6 flex flex-col gap-3">
+          <button
+            onClick={onConfirm}
+            className="w-full bg-[#5c4731] hover:bg-[#4B3621] text-white py-3.5 rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-[#5c4731]/20 active:scale-95 text-sm"
+          >
+            Sí, salir ahora
+          </button>
+          <button
+            onClick={onClose}
+            className="w-full bg-white hover:bg-white/80 text-[#5c4731] py-3.5 rounded-xl font-semibold transition-all duration-300 border border-[#fbefe1] active:scale-95 text-sm"
+          >
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default function Sidebar({ currentPage, onNavigate, role = 'user', isOpen, onClose, onLogout }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
+  // El menú básico para todos
   const menu = [
     { id: 'dashboard', label: 'Inicio', icon: <LayoutDashboard size={20} /> },
     { id: 'cultivos', label: 'Cultivos', icon: <Sprout size={20} /> },
     { id: 'reportes', label: 'Reportes', icon: <BarChart3 size={20} /> },
   ];
 
+  // Solo Admin ve Usuarios y Ajustes
   if (role === 'admin') {
     menu.push({ id: 'usuarios', label: 'Usuarios', icon: <Users size={20} /> });
+    menu.push({ id: 'ajustes', label: 'Ajustes', icon: <Settings size={20} /> });
   }
 
-  menu.push({ id: 'ajustes', label: 'Ajustes', icon: <Settings size={20} /> });
+  const handleLogout = () => {
+    logout();
+    if (onLogout) onLogout();
+    navigate('/');
+    setShowLogoutModal(false);
+  };
 
   const sidebarClasses = `
     fixed lg:static inset-y-0 left-0 z-50
@@ -34,40 +78,26 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
   const headerTitleClasses = `
     text-lg font-semibold
     text-[#5c4731]
+    tracking-tight
   `;
 
   const navItemClasses = (isActive) => `
-    w-full flex items-center gap-3.5 px-4 py-3 rounded-[14px]
-    text-sm font-medium transition-all duration-250 ease
+    w-full flex items-center gap-3.5 px-4 py-3.5 rounded-[16px]
+    text-[13px] font-semibold transition-all duration-300
     ${isActive 
-      ? 'bg-white text-[#8b6f47] shadow-[0_6px_18px_rgba(139,111,71,0.12)]'
-      : 'text-gray-500 hover:bg-[rgba(139,111,71,0.08)] hover:text-[#5c4731]'
+      ? 'bg-white text-[#8b6f47] shadow-[0_8px_20px_rgba(139,111,71,0.12)] scale-[1.02]'
+      : 'text-gray-500 hover:bg-[rgba(139,111,71,0.06)] hover:text-[#5c4731]'
     }
-  `;
-
-  const footerClasses = `
-    mt-auto pt-6 border-t
-    border-[rgba(139,111,71,0.15)]
-  `;
-
-  const avatarClasses = `
-    w-[38px] h-[38px] rounded-xl bg-[#8b6f47] text-white font-semibold
-    flex items-center justify-center shadow-sm
-  `;
-
-  const userNameClasses = `
-    text-sm font-semibold
-    text-[#5c4731]
-  `;
-
-  const userRoleClasses = `
-    text-xs
-    text-gray-400
   `;
 
   return (
     <>
-      {/* Overlay con blur mejorado para móvil */}
+      <LogoutModal 
+        isOpen={showLogoutModal} 
+        onClose={() => setShowLogoutModal(false)} 
+        onConfirm={handleLogout} 
+      />
+
       {isOpen && (
         <div 
           className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden animate-fadeIn"
@@ -76,18 +106,18 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
       )}
 
       <aside className={sidebarClasses}>
-        <div className="flex items-center gap-3 mb-10">
-          <img src={logo} alt="Tetlalli" className="w-[38px] h-[38px] rounded-xl object-cover" />
+        <div className="flex items-center gap-3 mb-10 overflow-hidden">
+          <img src={logo} alt="Tetlalli" className="w-[40px] h-[40px] rounded-2xl object-cover shadow-sm bg-white p-1" />
           <h1 className={headerTitleClasses}>{user?.farmName || "Tetlalli"}</h1>
           <button
             onClick={onClose}
-            className="absolute top-8 right-4 p-2 lg:hidden hover:bg-black/5 rounded-lg transition-colors"
+            className="absolute top-8 right-4 p-2.5 lg:hidden hover:bg-black/5 rounded-xl transition-all"
           >
-            <ChevronLeft size={20} className="text-gray-500" />
+            <ChevronLeft size={18} className="text-gray-500" />
           </button>
         </div>
 
-        <nav className="flex-1 flex flex-col gap-2 overflow-y-auto">
+        <nav className="flex-1 flex flex-col gap-2.5 overflow-y-auto pr-1">
           {menu.map(item => (
             <button
               key={item.id}
@@ -108,31 +138,26 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
               </span>
               <span className="flex-1 text-left">{item.label}</span>
               {item.id === 'usuarios' && role === 'admin' && (
-                <span className="px-2 py-1 rounded-lg text-xs font-medium bg-[#8b6f47]/10 text-[#8b6f47]">
-                  Admin
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#8b6f47]/10 text-[#8b6f47] uppercase tracking-tighter">
+                  Pro
                 </span>
               )}
             </button>
           ))}
         </nav>
 
-        <div className={footerClasses}>
-          <div className="flex items-center gap-3">
-            <div className={avatarClasses}>
-              {user?.name?.[0] || "U"}
+        <div className="mt-auto pt-6 border-t border-[rgba(139,111,71,0.15)] bg-transparent">
+          <div className="flex items-center gap-3 p-1">
+            <div className="w-[40px] h-[40px] rounded-[14px] bg-[#8b6f47] text-white font-bold flex items-center justify-center shadow-lg shadow-[#8b6f47]/20 border border-white/20">
+              {user?.name?.[0]?.toUpperCase() || "U"}
             </div>
-            <div className="flex flex-col">
-              <span className={userNameClasses}>{user?.name || "Invitado"}</span>
-              <span className={userRoleClasses}>{user?.role || "Usuario"}</span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-[13px] font-bold text-[#5c4731] truncate">{user?.name || "Invitado"}</span>
+              <span className="text-[10px] font-medium text-gray-400 capitalize">{user?.role || "Usuario"}</span>
             </div>
             <button 
-              onClick={() => {
-                if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
-                  logout();
-                  if (onLogout) onLogout();
-                }
-              }}
-              className="ml-auto p-2 hover:bg-black/5 rounded-lg transition-colors group"
+              onClick={() => setShowLogoutModal(true)}
+              className="ml-auto p-2.5 hover:bg-red-50 rounded-xl transition-all duration-300 group shadow-sm bg-white/40 border border-[#fbefe1]"
               title="Cerrar sesión"
             >
               <LogOut size={16} className="text-gray-400 group-hover:text-red-500 transition-colors" />
@@ -143,17 +168,15 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
 
       <style>{`
         @keyframes fadeIn {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.25s ease-out forwards;
+        @keyframes slideUp {
+          from { transform: translateY(15px); opacity: 0; }
+          to { transform: translateY(0); opacity: 1; }
         }
+        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+        .animate-slideUp { animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
       `}</style>
     </>
   );
