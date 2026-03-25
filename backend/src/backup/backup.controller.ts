@@ -2,11 +2,11 @@ import { Controller, Get, UseGuards, Res } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { Role } from '../auth/role.decorator';
 
 @Controller('backup')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles('admin')
+@Role('admin')
 export class BackupController {
   constructor(private readonly prisma: PrismaService) {}
 

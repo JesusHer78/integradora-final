@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { BackupController } from './backup.controller';
-import { PrismaModule } from '../prisma/prisma.module';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Module({
-  imports: [PrismaModule],
   controllers: [BackupController],
+  providers: [PrismaService],
 })
 export class BackupModule {}
