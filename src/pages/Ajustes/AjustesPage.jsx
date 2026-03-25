@@ -67,23 +67,35 @@ export default function AjustesPage() {
     }
   };
 
-  const handleExportData = () => {
-    const backupData = {
-      ...settings,
-      exportDate: new Date().toISOString(),
-      appName: "Tetlalli"
-    };
-    
-    const dataStr = JSON.stringify(backupData, null, 2);
-    const blob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    const safeName = settings.farmName.toLowerCase().replace(/[^a-z0-9]/g, '_');
-    link.download = `tetlalli_config_${safeName}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleExportData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/backup`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      
+      if (!res.ok) throw new Error("Error al descargar respaldo");
+      
+      const fullBackup = await res.json();
+      const dataStr = JSON.stringify(fullBackup, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const safeName = settings.farmName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+      link.download = `tetlalli_full_backup_${safeName}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      setSuccessMessage('¡Respaldo de base de datos generado!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      console.error(err);
+      setError('Fallo al generar respaldo de DB');
+    }
   };
 
   if (user && user.role !== 'admin') return null;

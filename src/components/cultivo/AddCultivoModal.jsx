@@ -197,8 +197,8 @@ export default function AddCultivoModal({ isOpen, onClose, onSave }) {
                     className="w-full px-3 sm:px-4 py-2 sm:py-2.5 text-sm sm:text-base border border-gray-200 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-[#8B6F47]/20 focus:border-[#8B6F47] transition-all bg-white"
                   >
                     <option value="">Seleccionar ubicación</option>
-                    <option value="Invernadero A">Invernadero A</option>
-                    <option value="Invernadero B">Invernadero B</option>
+                    <option value="Sección A">Sección A</option>
+                    <option value="Sección B">Sección B</option>
                     <option value="Campo Abierto">Campo Abierto</option>
                   </select>
                   <ChevronDown
