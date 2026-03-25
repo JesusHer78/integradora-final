@@ -127,8 +127,10 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
             </div>
             <button 
               onClick={() => {
-                logout();
-                if (onLogout) onLogout();
+                if (window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
+                  logout();
+                  if (onLogout) onLogout();
+                }
               }}
               className="ml-auto p-2 hover:bg-black/5 rounded-lg transition-colors group"
               title="Cerrar sesión"
