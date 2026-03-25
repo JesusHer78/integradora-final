@@ -2,7 +2,7 @@ import { useState } from "react";
 import logo from "../../assets/logo.png";
 import { loginUsuario, registerUsuario } from "../../services/usuarios.service";
 import { useAuth } from "../../context/AuthContext";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage({ onBackToLanding }) {
@@ -10,6 +10,8 @@ export default function LoginPage({ onBackToLanding }) {
   const [isLoginActive, setIsLoginActive] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showAdminCode, setShowAdminCode] = useState(false);
   const [formData, setFormData] = useState({
     nombre: "",
     email: "",
@@ -151,6 +153,8 @@ export default function LoginPage({ onBackToLanding }) {
       setIsLoginActive(!isLoginActive);
       setFormData({ nombre: "", email: "", password: "", adminCode: "" });
       setErrorMessage("");
+      setShowPassword(false);
+      setShowAdminCode(false);
       setFieldErrors({ nombre: "", email: "", password: "" });
       setTimeout(() => setIsAnimating(false), 50);
     }, 300);
@@ -190,14 +194,14 @@ export default function LoginPage({ onBackToLanding }) {
       {/* Hojas animadas */}
       {leafPositions.map((position, i) => (
         <div 
-          key={i} 
           className={`absolute pointer-events-none z-10 ${position}`}
+          key={i} 
           style={{
             animation: `leaf-float ${8 + (i % 5)}s ease-in-out infinite`,
             animationDelay: `${i * 0.4}s`
           }}
         >
-          <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-md">
+          <svg className="w-full h-full drop-shadow-md" viewBox="0 0 100 100">
             <path d="M50,5 C35,20 20,35 10,50 C5,60 5,75 15,85 C25,95 40,95 50,90 C60,95 75,95 85,85 C95,75 95,60 90,50 C80,35 65,20 50,5 Z" />
           </svg>
         </div>
@@ -214,9 +218,9 @@ export default function LoginPage({ onBackToLanding }) {
         }`}>
           <div className="text-center max-w-[260px]">
             <img 
-              src={logo} 
               alt="logo" 
               className="w-[60px] mx-auto mb-5 drop-shadow-md hover:scale-105 hover:rotate-6 transition-transform duration-300 cursor-pointer" 
+              src={logo} 
             />
             <h2 className="text-3xl font-bold mb-4">
               {isLoginActive ? "¡Hola!" : "¡Bienvenido!"}
@@ -227,9 +231,9 @@ export default function LoginPage({ onBackToLanding }) {
                 : "Ingresa tus datos personales para acceder a tu cuenta"}
             </p>
             <button
-              onClick={toggleMode}
-              disabled={isAnimating}
               className="bg-transparent border-2 border-white text-white px-7 py-2.5 rounded-full font-semibold relative overflow-hidden group transition-all duration-300 hover:scale-105"
+              disabled={isAnimating}
+              onClick={toggleMode}
             >
               <span className="relative z-10">
                 {isLoginActive ? "Registrarse" : "Iniciar sesión"}
@@ -262,22 +266,22 @@ export default function LoginPage({ onBackToLanding }) {
               <h2 className="text-3xl font-bold mb-1 text-[#a57c5a]">Iniciar Sesión</h2>
               <p className="text-sm text-[#b78c63] mb-6 opacity-80">Usa tu correo y contraseña</p>
               
-              <form onSubmit={handleSubmit} className="flex flex-col">
+              <form className="flex flex-col" onSubmit={handleSubmit}>
                 <div className="flex flex-col mb-4">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">Email</label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    required
-                    disabled={loading}
-                    placeholder="ejemplo@correo.com"
                     autoComplete="email"
                     className={`p-3 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
                       fieldErrors.email ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
                     }`}
+                    disabled={loading}
+                    name="email"
+                    onBlur={handleBlur}
+                    onChange={handleInputChange}
+                    placeholder="ejemplo@correo.com"
+                    required
+                    type="email"
+                    value={formData.email}
                   />
                   {fieldErrors.email && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
@@ -286,29 +290,39 @@ export default function LoginPage({ onBackToLanding }) {
 
                 <div className="flex flex-col mb-6">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    required
-                    disabled={loading}
-                    placeholder="Mínimo 6 caracteres"
-                    autoComplete="current-password"
-                    className={`p-3 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
-                      fieldErrors.password ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
-                    }`}
-                  />
+                  <div className="relative">
+                    <input
+                      autoComplete="current-password"
+                      className={`w-full p-3 pr-10 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
+                        fieldErrors.password ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
+                      }`}
+                      disabled={loading}
+                      name="password"
+                      onBlur={handleBlur}
+                      onChange={handleInputChange}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                    />
+                    <button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a57c5a] hover:text-[#b78c63] transition-colors p-1"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex="-1"
+                      type="button"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {fieldErrors.password && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
                   )}
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={loading}
                   className="p-3 bg-gradient-to-r from-[#c49a6c] to-[#b78c63] text-white rounded-lg font-semibold mt-2 hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
+                  type="submit"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
@@ -333,22 +347,22 @@ export default function LoginPage({ onBackToLanding }) {
               <h2 className="text-3xl font-bold mb-1 text-[#a57c5a]">Crear Cuenta</h2>
               <p className="text-sm text-[#b78c63] mb-6 opacity-80">Regístrate con tu correo</p>
               
-              <form onSubmit={handleSubmit} className="flex flex-col">
+              <form className="flex flex-col" onSubmit={handleSubmit}>
                 <div className="flex flex-col mb-4">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">Nombre</label>
                   <input
-                    type="text"
-                    name="nombre"
-                    value={formData.nombre}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    required
-                    disabled={loading}
-                    placeholder="Tu nombre completo"
                     autoComplete="name"
                     className={`p-3 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
                       fieldErrors.nombre ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
                     }`}
+                    disabled={loading}
+                    name="nombre"
+                    onBlur={handleBlur}
+                    onChange={handleInputChange}
+                    placeholder="Tu nombre completo"
+                    required
+                    type="text"
+                    value={formData.nombre}
                   />
                   {fieldErrors.nombre && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.nombre}</p>
@@ -358,18 +372,18 @@ export default function LoginPage({ onBackToLanding }) {
                 <div className="flex flex-col mb-4">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">Email</label>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    required
-                    disabled={loading}
-                    placeholder="ejemplo@correo.com"
                     autoComplete="email"
                     className={`p-3 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
                       fieldErrors.email ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
                     }`}
+                    disabled={loading}
+                    name="email"
+                    onBlur={handleBlur}
+                    onChange={handleInputChange}
+                    placeholder="ejemplo@correo.com"
+                    required
+                    type="email"
+                    value={formData.email}
                   />
                   {fieldErrors.email && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>
@@ -378,20 +392,30 @@ export default function LoginPage({ onBackToLanding }) {
 
                 <div className="flex flex-col mb-6">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">Password</label>
-                  <input
-                    type="password"
-                    name="password"
-                    value={formData.password}
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    required
-                    disabled={loading}
-                    placeholder="Mínimo 6 caracteres, una letra y un número"
-                    autoComplete="new-password"
-                    className={`p-3 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
-                      fieldErrors.password ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
-                    }`}
-                  />
+                  <div className="relative">
+                    <input
+                      autoComplete="new-password"
+                      className={`w-full p-3 pr-10 rounded-lg border text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300 ${
+                        fieldErrors.password ? "border-red-500 bg-red-50" : "border-[#e2d5c8] hover:border-[#c49a6c]"
+                      }`}
+                      disabled={loading}
+                      name="password"
+                      onBlur={handleBlur}
+                      onChange={handleInputChange}
+                      placeholder="Mínimo 6 caracteres, una letra y un número"
+                      required
+                      type={showPassword ? "text" : "password"}
+                      value={formData.password}
+                    />
+                    <button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a57c5a] hover:text-[#b78c63] transition-colors p-1"
+                      onClick={() => setShowPassword(!showPassword)}
+                      tabIndex="-1"
+                      type="button"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                   {fieldErrors.password && (
                     <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>
                   )}
@@ -399,21 +423,31 @@ export default function LoginPage({ onBackToLanding }) {
 
                 <div className="flex flex-col mb-4">
                   <label className="text-xs mb-1 text-[#a57c5a] font-medium">¿Código de Administrador? (Opcional)</label>
-                  <input
-                    type="password"
-                    name="adminCode"
-                    value={formData.adminCode}
-                    onChange={handleInputChange}
-                    disabled={loading}
-                    placeholder="Escribe el código secreto"
-                    className="p-3 rounded-lg border border-[#e2d5c8] hover:border-[#c49a6c] text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300"
-                  />
+                  <div className="relative">
+                    <input
+                      className="w-full p-3 pr-10 rounded-lg border border-[#e2d5c8] hover:border-[#c49a6c] text-sm bg-[#fffbf5] focus:outline-none focus:ring-2 focus:ring-[#c49a6c] focus:border-transparent transition-all duration-300"
+                      disabled={loading}
+                      name="adminCode"
+                      onChange={handleInputChange}
+                      placeholder="Escribe el código secreto"
+                      type={showAdminCode ? "text" : "password"}
+                      value={formData.adminCode}
+                    />
+                    <button
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a57c5a] hover:text-[#b78c63] transition-colors p-1"
+                      onClick={() => setShowAdminCode(!showAdminCode)}
+                      tabIndex="-1"
+                      type="button"
+                    >
+                      {showAdminCode ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
 
                 <button
-                  type="submit"
-                  disabled={loading}
                   className="p-3 bg-gradient-to-r from-[#c49a6c] to-[#b78c63] text-white rounded-lg font-semibold mt-2 hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={loading}
+                  type="submit"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
