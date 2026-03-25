@@ -24,9 +24,17 @@ export default function CultivoCard({ cultivo }) {
 
       {cultivo.imagen && (
         <img
-          src={`http://localhost:3000${cultivo.imagen}`}
+          src={
+            cultivo.imagen.startsWith('http') 
+              ? cultivo.imagen 
+              : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace(/\\/g, '/')}`
+          }
           alt={cultivo.nombre}
           className="cultivo-image"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://via.placeholder.com/400x300?text=Cultivo+sin+imagen";
+          }}
         />
       )}
 

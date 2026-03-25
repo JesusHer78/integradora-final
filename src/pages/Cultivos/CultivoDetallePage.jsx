@@ -227,9 +227,17 @@ export default function CultivoDetallePage({ cultivo, onBack }) {
           {cultivo.imagen ? (
             <div className="relative group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
               <img
-                src={cultivo.imagen}
+                src={
+                  cultivo.imagen.startsWith('http') 
+                    ? cultivo.imagen 
+                    : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace(/\\/g, '/')}`
+                }
                 alt={cultivo.nombre}
                 className="w-full h-56 sm:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-700"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = "https://via.placeholder.com/400x300?text=Cultivo+sin+imagen";
+                }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 bg-black/60 backdrop-blur-md rounded-lg p-1.5 sm:p-2 transform translate-y-full group-hover:translate-y-0 transition-transform duration-500">

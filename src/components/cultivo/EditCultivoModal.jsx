@@ -53,7 +53,11 @@ export default function EditCultivoModal({
       }
 
       if (cultivo.imagen) {
-        setPreviewUrl(`http://localhost:3000${cultivo.imagen}`);
+        setPreviewUrl(
+          cultivo.imagen.startsWith('http') 
+            ? cultivo.imagen 
+            : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace(/\\/g, '/')}`
+        );
       } else {
         setPreviewUrl("");
       }
