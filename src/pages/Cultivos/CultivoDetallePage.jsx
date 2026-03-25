@@ -228,9 +228,9 @@ export default function CultivoDetallePage({ cultivo, onBack }) {
             <div className="relative group rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-500">
               <img
                 src={
-                  cultivo.imagen.startsWith('http') 
+                  cultivo.imagen.startsWith('http') && !cultivo.imagen.includes('localhost:3000')
                     ? cultivo.imagen 
-                    : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace(/\\/g, '/')}`
+                    : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace('http://localhost:3000', '').replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace('http://localhost:3000', '').replace(/\\/g, '/')}`
                 }
                 alt={cultivo.nombre}
                 className="w-full h-56 sm:h-64 lg:h-72 object-cover group-hover:scale-110 transition-transform duration-700"

@@ -10,10 +10,9 @@ export class CultivosService {
   constructor(private readonly prisma: PrismaService) {}
 
   private formatImage(cultivo: any) {
-    const baseUrl = process.env.BASE_URL || 'http://localhost:3000'
     return {
       ...cultivo,
-      imagen: cultivo.imagen ? `${baseUrl}${cultivo.imagen}` : null,
+      imagen: cultivo.imagen || null,
     }
   }
 

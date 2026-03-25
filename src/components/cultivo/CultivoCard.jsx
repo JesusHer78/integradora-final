@@ -25,9 +25,9 @@ export default function CultivoCard({ cultivo }) {
       {cultivo.imagen && (
         <img
           src={
-            cultivo.imagen.startsWith('http') 
+            cultivo.imagen.startsWith('http') && !cultivo.imagen.includes('localhost:3000')
               ? cultivo.imagen 
-              : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace(/\\/g, '/')}`
+              : `${import.meta.env.VITE_API_URL}${cultivo.imagen.replace('http://localhost:3000', '').replace(/\\/g, '/').startsWith('/') ? '' : '/'}${cultivo.imagen.replace('http://localhost:3000', '').replace(/\\/g, '/')}`
           }
           alt={cultivo.nombre}
           className="cultivo-image"
