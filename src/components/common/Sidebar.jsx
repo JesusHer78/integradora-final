@@ -3,7 +3,7 @@ import logo from '../../assets/logo.png';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpen, onClose }) {
+export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpen, onClose, onLogout }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -114,17 +114,6 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
               )}
             </button>
           ))}
-
-          <div className="my-2 border-t border-[rgba(139,111,71,0.1)]"></div>
-          <button
-            onClick={() => navigate('/')}
-            className={navItemClasses(false)}
-          >
-            <span className="flex items-center transition-colors text-gray-400">
-              <Home size={20} />
-            </span>
-            <span className="flex-1 text-left">Volver al Inicio</span>
-          </button>
         </nav>
 
         <div className={footerClasses}>
@@ -137,7 +126,10 @@ export default function Sidebar({ currentPage, onNavigate, role = 'admin', isOpe
               <span className={userRoleClasses}>{user?.role || "Usuario"}</span>
             </div>
             <button 
-              onClick={logout}
+              onClick={() => {
+                logout();
+                if (onLogout) onLogout();
+              }}
               className="ml-auto p-2 hover:bg-black/5 rounded-lg transition-colors group"
               title="Cerrar sesión"
             >

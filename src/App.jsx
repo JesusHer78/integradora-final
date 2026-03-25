@@ -65,6 +65,10 @@ function App() {
         role={userRole}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
+        onLogout={() => {
+          setIsLoggedIn(false);
+          setShowLanding(false); // Make sure we hit the Login view, not Landing
+        }}
       />
 
       <main className="main-layout">
