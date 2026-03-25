@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { Globe, Sliders, Save, MapPin, Building2, Calendar, Download, Upload, Check, AlertCircle } from 'lucide-react';
+import { Sliders, Save, Building2, Calendar, Download, Check, AlertCircle } from 'lucide-react';
 
 export default function AjustesPage() {
   const { user, updateUser } = useAuth();
@@ -17,7 +17,7 @@ export default function AjustesPage() {
   const [successMessage, setSuccessMessage] = useState('');
   const [error, setError] = useState('');
 
-  // Protección de Ruta: Solo Admin (como refuerzo)
+  // Protección de Ruta: Solo Admin
   useEffect(() => {
     if (user && user.role !== 'admin') {
       navigate('/');
@@ -44,7 +44,6 @@ export default function AjustesPage() {
         body: JSON.stringify({
           farmName: settings.farmName,
           location: settings.location,
-          // Guardamos el formato de fecha aunque el backend no lo use explícitamente aún
           language: settings.dateFormat 
         })
       });
@@ -80,7 +79,6 @@ export default function AjustesPage() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    // Nombre de archivo descriptivo: tetlalli_config_NombreDelHuerto.json
     const safeName = settings.farmName.toLowerCase().replace(/[^a-z0-9]/g, '_');
     link.download = `tetlalli_config_${safeName}.json`;
     document.body.appendChild(link);
@@ -88,72 +86,39 @@ export default function AjustesPage() {
     document.body.removeChild(link);
   };
 
-  const handleImportData = (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const imported = JSON.parse(e.target.result);
-        if (imported.farmName && imported.location) {
-          setSettings(prev => ({ 
-            ...prev, 
-            farmName: imported.farmName,
-            location: imported.location,
-            dateFormat: imported.dateFormat || prev.dateFormat
-          }));
-          setSuccessMessage('Configuración cargada. Pulsa "Guardar" para aplicar.');
-          setTimeout(() => setSuccessMessage(''), 4000);
-        } else {
-          throw new Error("Formato inválido");
-        }
-      } catch (err) {
-        alert('El archivo no es una configuración válida de Tetlalli');
-      }
-    };
-    reader.readAsText(file);
-  };
-
   if (user && user.role !== 'admin') return null;
 
   return (
-    <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#8B6F47] to-[#6b5436] rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
+          <div className="w-12 h-12 bg-[#8B6F47] rounded-2xl flex items-center justify-center shadow-lg transform rotate-2">
             <Sliders size={22} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#4B3621]">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800">
               Ajustes del Sistema
             </h1>
-            <p className="text-xs text-[#8b6f47] font-medium tracking-wide uppercase">
-              Configuración Maestra del Huerto
+            <p className="text-[10px] text-[#8b6f47] font-bold tracking-widest uppercase">
+              Configuración Maestra
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
           {successMessage && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl text-xs font-bold border border-green-100 animate-fadeIn">
-              <Check size={14} />
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-xl text-[10px] font-bold border border-green-100 uppercase animate-fadeIn">
+              <Check size={12} />
               {successMessage}
-            </div>
-          )}
-          {error && (
-            <div className="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-700 rounded-xl text-xs font-bold border border-red-100 animate-fadeIn">
-              <AlertCircle size={14} />
-              {error}
             </div>
           )}
           <button
             onClick={handleSave}
             disabled={saving}
-            className="bg-[#5c4731] hover:bg-[#4B3621] text-white px-6 py-3 rounded-2xl text-sm font-bold transition-all shadow-lg hover:shadow-xl disabled:opacity-50 flex items-center gap-2"
+            className="bg-[#5c4731] hover:bg-[#4B3621] text-white px-6 py-3 rounded-2xl text-[13px] font-bold transition-all shadow-lg active:scale-95 disabled:opacity-50 flex items-center gap-2"
           >
-            {saving ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={18} />}
+            {saving ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Save size={16} />}
             <span>Guardar cambios</span>
           </button>
         </div>
@@ -161,37 +126,37 @@ export default function AjustesPage() {
 
       <div className="space-y-6">
         {/* Información del Huerto */}
-        <div className="bg-white rounded-3xl border border-[#fbefe1] shadow-sm p-6 sm:p-8 hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-[#8B6F47]/10 rounded-xl">
-              <Building2 size={20} className="text-[#8B6F47]" />
+              <Building2 size={18} className="text-[#8B6F47]" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 font-serif">Identidad del Huerto Escolar</h3>
+            <h3 className="text-base font-bold text-gray-800 uppercase tracking-tight">Identidad del Huerto</h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1">
-                Nombre Oficial
+          <div className="grid grid-cols-1 gap-6">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">
+                Nombre del Huerto Escolar UTT
               </label>
               <input
                 type="text"
                 value={settings.farmName}
                 onChange={(e) => handleChange('farmName', e.target.value)}
-                className="w-full px-5 py-4 bg-[#fffaf8] border border-[#fbefe1] rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-gray-700 font-medium placeholder:text-gray-300"
+                className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-sm font-bold text-gray-700 placeholder:text-gray-300"
                 placeholder="Ej: Tetlalli - Huerto UTT"
               />
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1">
-                Ubicación Regional
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">
+                Ubicación Regional (Tlaxcala)
               </label>
               <input
                 type="text"
                 value={settings.location}
                 onChange={(e) => handleChange('location', e.target.value)}
-                className="w-full px-5 py-4 bg-[#fffaf8] border border-[#fbefe1] rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-gray-700 font-medium placeholder:text-gray-300"
+                className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-sm font-bold text-gray-700 placeholder:text-gray-300"
                 placeholder="Ej: Tlaxcala, México"
               />
             </div>
@@ -199,67 +164,47 @@ export default function AjustesPage() {
         </div>
 
         {/* Formatos Regionales */}
-        <div className="bg-white rounded-3xl border border-[#fbefe1] shadow-sm p-6 sm:p-8 hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 sm:p-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="p-2 bg-[#8B6F47]/10 rounded-xl">
-              <Calendar size={20} className="text-[#8B6F47]" />
+              <Calendar size={18} className="text-[#8B6F47]" />
             </div>
-            <h3 className="text-lg font-bold text-gray-800 font-serif">Formatos Regionales</h3>
+            <h3 className="text-base font-bold text-gray-800 uppercase tracking-tight">Preferencias Regionales</h3>
           </div>
 
-          <div className="max-w-md">
-            <div className="space-y-2">
-              <label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest pl-1">
-                Formato de fecha (Estilo México)
-              </label>
-              <select
-                value={settings.dateFormat}
-                onChange={(e) => handleChange('dateFormat', e.target.value)}
-                className="w-full px-5 py-4 bg-[#fffaf8] border border-[#fbefe1] rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-gray-700 font-bold appearance-none cursor-pointer"
-              >
-                <option value="DD/MM/YYYY">DD/MM/YYYY (Ej: 25/03/2026)</option>
-                <option value="DD de MMMM de YYYY">DD de MMMM de YYYY (Ej: 25 de Marzo de 2026)</option>
-                <option value="YYYY-MM-DD">YYYY-MM-DD (Estándar)</option>
-              </select>
-            </div>
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">
+              Formato de fecha (Estilo México)
+            </label>
+            <select
+              value={settings.dateFormat}
+              onChange={(e) => handleChange('dateFormat', e.target.value)}
+              className="w-full px-5 py-4 bg-gray-50/50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-[#8B6F47]/10 focus:border-[#8B6F47] transition-all text-sm font-bold text-gray-700 cursor-pointer appearance-none"
+            >
+              <option value="DD/MM/YYYY">DD/MM/YYYY (Ej: 25/03/2026)</option>
+              <option value="DD de MMMM de YYYY">DD de MMMM de YYYY (Ej: 25 de Marzo de 2026)</option>
+              <option value="YYYY-MM-DD">YYYY-MM-DD (Universal)</option>
+            </select>
           </div>
         </div>
 
-        {/* Datos y Respaldo */}
-        <div className="bg-white rounded-3xl border border-[#fbefe1] shadow-sm p-6 sm:p-8 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="p-2 bg-[#8B6F47]/10 rounded-xl">
-              <Download size={20} className="text-[#8B6F47]" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-800 font-serif">Respaldo Maestro</h3>
-          </div>
-
-          <p className="text-sm text-gray-500 mb-8 leading-relaxed">
-            Mantén tu configuración segura. Exporta los ajustes actuales del huerto a un archivo JSON para poder restaurarlos más tarde si es necesario.
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
+        {/* Único Botón de Respaldo JSON */}
+        <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-6 sm:p-8 text-center">
+           <div className="w-16 h-16 bg-[#8B6F47]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Download size={28} className="text-[#8B6F47]" />
+           </div>
+           <h3 className="text-base font-bold text-gray-800 mb-2 uppercase tracking-tight">Respaldo Maestro de Configuración</h3>
+           <p className="text-xs text-gray-400 font-medium mb-8 max-w-sm mx-auto">
+            Guarda una copia de seguridad oficial de los ajustes de tu huerto en un archivo JSON seguro.
+           </p>
+           
+           <button
               onClick={handleExportData}
-              className="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-[#fbefe1] text-[#5c4731] rounded-2xl font-bold hover:bg-[#8B6F47] hover:text-white hover:border-[#8B6F47] transition-all transform active:scale-95 group"
+              className="inline-flex items-center justify-center gap-3 px-10 py-4 bg-[#8B6F47] text-white rounded-2xl font-bold hover:bg-[#6b5436] transition-all transform active:scale-95 group shadow-lg shadow-[#8B6F47]/20"
             >
               <Download size={18} className="group-hover:scale-110 transition-transform" />
-              Exportar JSON
+              Generar Backup JSON
             </button>
-
-            <label className="cursor-pointer group">
-              <div className="flex items-center justify-center gap-3 px-6 py-4 bg-[#8B6F47]/5 border-2 border-dashed border-[#8B6F47]/20 text-[#8B6F47] rounded-2xl font-bold group-hover:bg-[#8B6F47] group-hover:text-white group-hover:border-[#8B6F47] transition-all transform active:scale-95">
-                <Upload size={18} className="group-hover:scale-110 transition-transform" />
-                Importar JSON
-              </div>
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportData}
-                className="hidden"
-              />
-            </label>
-          </div>
         </div>
       </div>
 

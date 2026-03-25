@@ -47,8 +47,6 @@ export default function DashboardPage() {
   const [zonasCultivo, setZonasCultivo] = useState([]);
   const [actividad, setActividad] = useState([]);
   const [cultivosRecientes, setCultivosRecientes] = useState([]);
-  const [cultivosPorTipo, setCultivosPorTipo] = useState([]);
-  const [actividadesPendientes, setActividadesPendientes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [hoveredZone, setHoveredZone] = useState(null);
@@ -73,13 +71,11 @@ export default function DashboardPage() {
           {
             title: "Total de cultivos",
             value: data.length,
-            sub: isAdmin ? "Registrados en el sistema" : "Tus cultivos actuales",
+            sub: isAdmin ? "Resumen global del huerto" : "Tus cultivos actuales",
             icon: <Sprout size={22} />,
             bgColor: "bg-gradient-to-br from-amber-50 to-amber-100/30",
             iconBg: "bg-gradient-to-br from-[#8B6F47]/20 to-[#8B6F47]/10",
-            iconColor: "text-[#8B6F47]",
-            trend: isAdmin ? "+12%" : null,
-            trendUp: true
+            iconColor: "text-[#8B6F47]"
           }
         ]);
 
@@ -113,22 +109,6 @@ export default function DashboardPage() {
           }))
         );
 
-        const conteoTipos = {};
-        data.forEach(c => {
-          const tipo = c.tipo || "Sin tipo";
-          conteoTipos[tipo] = (conteoTipos[tipo] || 0) + 1;
-        });
-
-        setCultivosPorTipo(Object.entries(conteoTipos).map(([tipo, total]) => ({ tipo, total })));
-
-        const actividades = [
-          { id: 1, tarea: "Riego programado - Zona Norte", fecha: "Hoy, 10:00 AM", completada: false, prioridad: "alta" },
-          { id: 2, tarea: "Fertilización - Cultivo de maíz", fecha: "Mañana, 8:30 AM", completada: false, prioridad: "media" },
-          { id: 3, tarea: "Control de plagas", fecha: "15 Mar, 2:00 PM", completada: false, prioridad: "alta" },
-          { id: 4, tarea: "Cosecha - Tomates", fecha: "18 Mar, 9:00 AM", completada: false, prioridad: "baja" },
-        ];
-        setActividadesPendientes(actividades);
-
       } catch (err) {
         setError("Error al cargar los datos del dashboard");
         console.error("Error cargando dashboard:", err);
@@ -139,25 +119,6 @@ export default function DashboardPage() {
 
     fetchCultivos();
   }, [isAdmin]);
-
-  const completarActividad = (id) => {
-    setActividadesPendientes(prev =>
-      prev.map(act =>
-        act.id === id ? { ...act, completada: true } : act
-      )
-    );
-  };
-
-  const getPrioridadColor = (prioridad) => {
-    const colors = {
-      alta: "bg-red-100 text-red-700 border-red-200",
-      media: "bg-amber-100 text-amber-700 border-amber-200",
-      baja: "bg-green-100 text-green-700 border-green-200"
-    };
-    return colors[prioridad] || "bg-gray-100 text-gray-600";
-  };
-
-  const maxTipo = cultivosPorTipo.length ? Math.max(...cultivosPorTipo.map(t => t.total)) : 1;
 
   if (loading) {
     return (
@@ -189,51 +150,42 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 sm:space-y-8">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-6 sm:space-y-8 animate-fadeIn">
       {/* Header */}
-      <div className="flex items-center gap-3 animate-fadeIn">
-        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#8B6F47] to-[#6b5436] rounded-xl flex items-center justify-center shadow-lg">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-[#8B6F47] to-[#6b5436] rounded-xl flex items-center justify-center shadow-lg transform rotate-2 hover:rotate-0 transition-all">
           <BarChart3 size={18} className="sm:w-5.5 sm:h-5.5 text-white" />
         </div>
         <div>
-          <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+          <h1 className="text-xl sm:text-3xl font-bold text-gray-800">
             Panel de Control
           </h1>
-          <p className="text-[11px] sm:text-xs text-gray-400 mt-1 flex items-center gap-1">
+          <p className="text-[11px] sm:text-xs text-gray-400 mt-1 flex items-center gap-1 font-medium">
             <Activity size={12} className="sm:w-3.5 sm:h-3.5" />
-            Bienvenido a tu resumen agrícola
+            Resumen diario del huerto
           </p>
         </div>
       </div>
 
-      {/* KPI Section */}
+      {/* KPI Section - Simplificado para Admin y User */}
       <section className="grid grid-cols-1 gap-4 sm:gap-6">
         {kpis.map((kpi, idx) => (
           <div 
             key={kpi.title} 
-            className={`${kpi.bgColor} rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 transform hover:scale-[1.01] animate-slideUp`}
-            style={{ animationDelay: `${idx * 100}ms` }}
+            className={`${kpi.bgColor} rounded-[24px] p-5 sm:p-8 shadow-sm border border-gray-100 hover:shadow-xl transition-all duration-500 transform hover:scale-[1.01]`}
           >
             <div className="flex items-start justify-between">
               <div className="space-y-1 sm:space-y-2">
-                <p className="text-[10px] sm:text-sm text-gray-500 font-medium uppercase tracking-wider">{kpi.title}</p>
-                <p className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                <p className="text-[10px] sm:text-xs text-gray-500 font-bold uppercase tracking-widest">{kpi.title}</p>
+                <p className="text-4xl sm:text-5xl font-black text-gray-800">
                   {kpi.value}
                 </p>
-                <div className="flex items-center gap-2">
-                  <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1">
-                    <Activity size={10} className="sm:w-3 sm:h-3" />
-                    {kpi.sub}
-                  </p>
-                  {kpi.trend && (
-                    <span className={`text-[10px] sm:text-xs font-bold flex items-center gap-0.5 ${kpi.trendUp ? 'text-green-500' : 'text-red-500'}`}>
-                      {kpi.trendUp ? <ArrowUp size={10} /> : <ArrowDown size={10} />}
-                      {kpi.trend}
-                    </span>
-                  )}
-                </div>
+                <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 font-medium">
+                  <Activity size={10} className="sm:w-3.5 sm:h-3.5" />
+                  {kpi.sub}
+                </p>
               </div>
-              <div className={`${kpi.iconBg} p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-300 hover:scale-110 hover:rotate-6`}>
+              <div className={`${kpi.iconBg} p-3 sm:p-4 rounded-2xl transition-all duration-300 shadow-inner`}>
                 <div className={kpi.iconColor}>{kpi.icon}</div>
               </div>
             </div>
@@ -241,270 +193,132 @@ export default function DashboardPage() {
         ))}
       </section>
 
-      {/* Main Content Grid */}
-      <section className={`grid grid-cols-1 ${isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4 sm:gap-6`}>
-        {/* Mapa de Cultivos - Expande si no es Admin */}
-        <div className={`${isAdmin ? 'lg:col-span-2' : 'lg:col-span-1'} bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp`}>
-          <div className="flex items-center justify-between mb-4 sm:mb-5">
-            <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2 text-gray-800">
+      {/* Grid Principal - Ajustado para ocupar el espacio visual */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 pb-6">
+        {/* Mapa de Cultivos */}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-5 sm:p-7 shadow-sm hover:shadow-xl transition-all duration-500">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-sm sm:text-base font-bold flex items-center gap-2 text-gray-800">
               <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-                <MapPin size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
+                <MapPin size={16} className="text-[#8B6F47]" />
               </div>
               Mapa de cultivos
             </h3>
-            <span className="text-[10px] sm:text-xs text-[#8B6F47] bg-[#8B6F47]/10 px-2 sm:px-3 py-1 rounded-full font-medium">
+            <span className="text-[10px] sm:text-xs text-[#8B6F47] bg-[#8B6F47]/10 px-3 py-1 rounded-full font-bold">
               {zonasCultivo.length} activos
             </span>
           </div>
-          <div className={`grid grid-cols-2 ${isAdmin ? 'sm:grid-cols-3 md:grid-cols-4' : 'sm:grid-cols-2'} gap-3 sm:gap-4`}>
-            {zonasCultivo.slice(0, 8).map((zone, idx) => (
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-2 xl:grid-cols-3">
+            {zonasCultivo.slice(0, 9).map((zone, idx) => (
               <div 
                 key={zone.id} 
-                className={`relative p-3 sm:p-4 rounded-xl text-center transition-all duration-300 cursor-pointer transform hover:scale-105 ${
+                className={`relative p-3 rounded-xl border transition-all duration-300 cursor-pointer transform hover:scale-[1.03] ${
                   zone.status === 'alert' 
-                    ? 'bg-gradient-to-br from-red-50 to-red-100/30 border border-red-100 hover:shadow-lg' 
-                    : 'bg-gradient-to-br from-gray-50 to-gray-100/30 border border-gray-100 hover:shadow-lg'
+                    ? 'bg-red-50/30 border-red-100 hover:shadow-lg' 
+                    : 'bg-gray-50/30 border-gray-100 hover:shadow-lg'
                 }`}
-                onMouseEnter={() => setHoveredZone(zone.id)}
-                onMouseLeave={() => setHoveredZone(null)}
-                style={{ animationDelay: `${idx * 50}ms` }}
               >
-                <div className="flex items-center justify-center gap-1 mb-2">
+                <div className="flex items-center justify-center gap-1.5 mb-2">
                   <Sprout size={14} className={zone.status === 'alert' ? 'text-red-500 animate-pulse' : 'text-[#8B6F47]'} />
-                  <p className="text-xs sm:text-sm font-semibold text-gray-800 truncate">{zone.name}</p>
+                  <p className="text-xs font-bold text-gray-700 truncate">{zone.name}</p>
                 </div>
-                <p className="text-[9px] sm:text-[10px] text-gray-400 truncate">{zone.lugar}</p>
-                {zone.humedad !== "—" && (
-                  <div className={`flex items-center justify-center gap-2 mt-2 sm:mt-3 text-[10px] transition-all duration-300 ${hoveredZone === zone.id ? 'opacity-100' : 'opacity-70'}`}>
-                    <div className="flex items-center gap-1">
-                      <Droplets size={10} className="text-blue-400" />
-                      <span className="text-gray-600">{zone.humedad}</span>
-                    </div>
-                    <div className="w-px h-2 sm:h-3 bg-gray-200"></div>
-                    <div className="flex items-center gap-1">
-                      <Thermometer size={10} className="text-orange-400" />
-                      <span className="text-gray-600">{zone.temp}</span>
-                    </div>
+                <div className="flex items-center justify-center gap-3 text-[10px] font-bold text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Droplets size={10} className="text-blue-400" /> {zone.humedad}
                   </div>
-                )}
+                  <div className="flex items-center gap-1">
+                    <Thermometer size={10} className="text-orange-400" /> {zone.temp}
+                  </div>
+                </div>
               </div>
             ))}
-            {zonasCultivo.length === 0 && (
-              <div className="col-span-full py-8 text-center text-gray-400 text-xs italic">
-                No hay cultivos registrados
+             {zonasCultivo.length === 0 && (
+              <div className="col-span-full py-10 text-center text-gray-400 text-xs italic">
+                Sin cultivos en el mapa
               </div>
             )}
           </div>
         </div>
 
-        {/* Pronóstico - Siempre Visible */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-          <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-gray-800">
+        {/* Pronóstico Regional */}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-5 sm:p-7 shadow-sm hover:shadow-xl transition-all duration-500">
+          <h3 className="text-sm sm:text-base font-bold mb-6 flex items-center gap-2 text-gray-800">
             <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-              <CloudSun size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
+              <CloudSun size={16} className="text-[#8B6F47]" />
             </div>
-            Pronóstico Regional
+            Pronóstico de Tlaxcala
           </h3>
-          <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-3 sm:space-y-4">
             {pronostico.map((day, idx) => (
               <div 
                 key={day.day} 
-                className="flex justify-between items-center py-1.5 sm:py-2 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 px-2 rounded-lg transition-all duration-300"
-                style={{ animationDelay: `${idx * 50}ms` }}
+                className="flex justify-between items-center py-2 px-3 hover:bg-gray-50/80 rounded-xl transition-all"
               >
-                <span className="text-xs sm:text-sm font-medium text-gray-600 w-8">{day.day}</span>
+                <span className="text-xs sm:text-sm font-bold text-gray-500 w-10 uppercase">{day.day}</span>
                 <div className="flex gap-2 items-center">{day.icon}</div>
-                <div className="flex items-center gap-2 lg:gap-3">
-                  <span className="text-[10px] sm:text-sm text-gray-400">{day.min}°</span>
-                  <div className="w-8 sm:w-16 h-1 bg-gray-100 rounded-full overflow-hidden">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <span className="text-[11px] sm:text-xs text-gray-400 font-bold">{day.min}°</span>
+                  <div className="w-12 sm:w-24 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                     <div 
-                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full"
+                      className="h-full bg-gradient-to-r from-amber-400 to-orange-500"
                       style={{ width: `${((day.max - 15) / 20) * 100}%` }}
                     />
                   </div>
-                  <span className="text-[11px] sm:text-sm font-bold text-gray-700">{day.temp}</span>
+                  <span className="text-[11px] sm:text-sm font-black text-gray-700">{day.temp}</span>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </section>
 
-      {/* Row 2: Secondary Info */}
-      <section className={`grid grid-cols-1 ${isAdmin ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-4 sm:gap-6`}>
-        {/* Recientes - Expande */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-          <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-gray-800">
+        {/* Últimos Registros */}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-5 sm:p-7 shadow-sm hover:shadow-xl transition-all duration-500">
+          <h3 className="text-sm sm:text-base font-bold mb-6 flex items-center gap-2 text-gray-800">
             <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-              <TrendingUp size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
+              <TrendingUp size={16} className="text-[#8B6F47]" />
             </div>
-            Últimos Registros
+            Últimos Ingresos
           </h3>
-          <div className="space-y-2 sm:space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {cultivosRecientes.map((c, idx) => (
               <div 
                 key={c.id} 
-                className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded-lg transition-all duration-300 transform hover:translate-x-1"
-                style={{ animationDelay: `${idx * 50}ms` }}
+                className="flex items-center gap-3 p-3 bg-gray-50/50 rounded-xl border border-transparent hover:border-[#8B6F47]/20 transition-all hover:translate-x-1"
               >
-                <div className="w-1.5 h-1.5 rounded-full bg-[#8B6F47]/40"></div>
-                <p className="text-xs sm:text-sm text-gray-700 font-medium truncate">{c.nombre}</p>
+                <div className="w-2 h-2 rounded-full bg-[#8B6F47]"></div>
+                <p className="text-xs sm:text-sm text-gray-700 font-bold truncate">{c.nombre}</p>
               </div>
             ))}
-            {cultivosRecientes.length === 0 && (
-              <p className="text-center text-[10px] text-gray-400 py-4 italic">No hay registros recientes</p>
+             {cultivosRecientes.length === 0 && (
+              <p className="col-span-full py-4 text-center text-gray-400 text-xs italic">No hay registros</p>
             )}
           </div>
         </div>
 
-        {/* Actividad Reciente */}
-        <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-          <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-gray-800">
+        {/* Bitácora Rápida */}
+        <div className="bg-white rounded-[24px] border border-gray-100 p-5 sm:p-7 shadow-sm hover:shadow-xl transition-all duration-500">
+          <h3 className="text-sm sm:text-base font-bold mb-6 flex items-center gap-2 text-gray-800">
             <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-              <Activity size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
+              <Activity size={16} className="text-[#8B6F47]" />
             </div>
-            Bitácora Rápida
+            Actividad Histórica
           </h3>
-          <div className="space-y-2 sm:space-y-3">
+          <div className="space-y-3">
             {actividad.map((a, idx) => (
               <div 
                 key={a.id} 
-                className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg transition-all duration-300"
-                style={{ animationDelay: `${idx * 50}ms` }}
+                className="flex items-center justify-between p-3 bg-transparent hover:bg-[#8B6F47]/5 rounded-xl transition-all"
               >
-                <p className="text-xs sm:text-sm text-gray-600 truncate mr-2">{a.text}</p>
-                <span className="text-[9px] sm:text-[10px] text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full font-medium">{a.date}</span>
+                <p className="text-xs text-gray-600 font-bold truncate mr-3">{a.text}</p>
+                <span className="text-[9px] font-black text-gray-400 bg-white px-3 py-1 rounded-full uppercase border border-gray-100">{a.date}</span>
               </div>
             ))}
              {actividad.length === 0 && (
-              <p className="text-center text-[10px] text-gray-400 py-4 italic">Sin actividad registrada</p>
+              <p className="text-center text-[10px] text-gray-400 py-4 italic">Sin historial reciente</p>
             )}
           </div>
         </div>
-
-        {/* Distribución - Solo ADMIN */}
-        {isAdmin && (
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-            <h3 className="text-sm sm:text-base font-semibold mb-3 sm:mb-4 flex items-center gap-2 text-gray-800">
-              <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-                <Gauge size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
-              </div>
-              Distribución por tipo
-            </h3>
-            <div className="space-y-3 sm:space-y-4">
-              {cultivosPorTipo.map((t, idx) => (
-                <div 
-                  key={t.tipo} 
-                  className="group"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="flex justify-between items-center gap-2 mb-1.5">
-                    <span className="text-xs sm:text-sm text-gray-600 font-medium">{t.tipo}</span>
-                    <span className="text-xs sm:text-sm font-bold text-[#8B6F47]">{t.total}</span>
-                  </div>
-                  <div className="w-full bg-gray-100 rounded-full h-1.5 sm:h-2 overflow-hidden shadow-inner">
-                    <div 
-                      style={{ width: `${(t.total / maxTipo) * 100}%` }} 
-                      className="h-full rounded-full transition-all duration-1000 ease-out bg-gradient-to-r from-[#8B6F47] to-[#9b7f57] group-hover:scale-y-110"
-                    />
-                  </div>
-                </div>
-              ))}
-              {cultivosPorTipo.length === 0 && (
-                <p className="text-center text-[10px] text-gray-400 py-4 italic">No hay datos disponibles</p>
-              )}
-            </div>
-          </div>
-        )}
       </section>
-
-      {/* Row 3: Admin Only Actions */}
-      {isAdmin && (
-        <section className="grid md:grid-cols-2 gap-4 sm:gap-6 pb-4 sm:pb-8">
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-            <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2 mb-4 sm:mb-5 text-gray-800">
-              <div className="p-1.5 bg-[#8B6F47]/10 rounded-lg">
-                <Calendar size={16} className="sm:w-4.5 sm:h-4.5 text-[#8B6F47]" />
-              </div>
-              Próximas Actividades
-            </h3>
-            <div className="space-y-2 sm:space-y-3">
-              {actividadesPendientes.filter(act => !act.completada).map((act, idx) => (
-                <div 
-                  key={act.id} 
-                  className="flex items-center gap-2.5 sm:gap-3 p-2.5 sm:p-3 hover:bg-gradient-to-r hover:from-gray-50 hover:to-transparent rounded-xl transition-all duration-300 transform hover:translate-x-1 border border-transparent hover:border-gray-50"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#8B6F47]/5 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <Sprout size={16} className="text-[#8B6F47]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="text-[11px] sm:text-sm font-semibold text-gray-700 truncate">{act.tarea}</p>
-                      <span className={`text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-tighter ${getPrioridadColor(act.prioridad)}`}>
-                        {act.prioridad}
-                      </span>
-                    </div>
-                    <p className="text-[10px] sm:text-xs text-gray-400 flex items-center gap-1 mt-1 font-medium">
-                      <Clock size={10} />
-                      {act.fecha}
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => completarActividad(act.id)}
-                    className="p-1.5 sm:px-3 sm:py-2 text-[10px] sm:text-xs bg-gray-50 hover:bg-[#8B6F47] text-gray-400 hover:text-white rounded-lg transition-all duration-300 transform hover:scale-105"
-                  >
-                    <Check size={14} className="sm:hidden" />
-                    <span className="hidden sm:inline">Completar</span>
-                  </button>
-                </div>
-              ))}
-              {actividadesPendientes.filter(act => !act.completada).length === 0 && (
-                <div className="text-center py-6 sm:py-8 animate-fadeIn">
-                  <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-2">
-                    <Check size={20} className="text-green-500" />
-                  </div>
-                  <p className="text-xs text-gray-500 font-semibold">¡Todo al día!</p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-500 animate-slideUp">
-            <h3 className="text-sm sm:text-base font-semibold flex items-center gap-2 mb-4 sm:mb-5 text-gray-800">
-              <div className="p-1.5 bg-green-50 rounded-lg">
-                <Check size={16} className="sm:w-4.5 sm:h-4.5 text-green-600" />
-              </div>
-              Actividades Completadas
-            </h3>
-            <div className="space-y-2 sm:space-y-3">
-              {actividadesPendientes.filter(act => act.completada).map((act, idx) => (
-                <div 
-                  key={act.id} 
-                  className="flex items-center gap-3 p-2.5 sm:p-3 bg-gray-50/50 rounded-xl transition-all duration-300"
-                  style={{ animationDelay: `${idx * 50}ms` }}
-                >
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-50 rounded-lg sm:rounded-xl flex items-center justify-center">
-                    <Check size={16} className="text-green-600" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] sm:text-sm font-medium text-gray-400 line-through truncate">{act.tarea}</p>
-                    <p className="text-[10px] sm:text-xs text-gray-300 flex items-center gap-1 mt-0.5">
-                      <Calendar size={10} />
-                      {act.fecha}
-                    </p>
-                  </div>
-                </div>
-              ))}
-              {actividadesPendientes.filter(act => act.completada).length === 0 && (
-                <div className="text-center py-6 sm:py-10">
-                  <p className="text-[10px] sm:text-xs text-gray-400 italic">No hay historial</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-      )}
 
       <AddCultivoModal
         isOpen={showAddModal}
@@ -517,22 +331,8 @@ export default function DashboardPage() {
           from { opacity: 0; }
           to { opacity: 1; }
         }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
         .animate-fadeIn { 
           animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
-        }
-        .animate-slideUp {
-          animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          opacity: 0;
         }
       `}</style>
     </div>
